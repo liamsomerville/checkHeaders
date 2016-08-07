@@ -5,7 +5,7 @@
 
 This script peforms the following header checks
 - cache contorl
-- prgma
+- pragma
 - content type
 - content character set
 - access control allow origin
