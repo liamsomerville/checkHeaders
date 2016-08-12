@@ -21,3 +21,6 @@ Now, when it comes to the x-frame-options check, OWASP Tells us we can remediate
   - At the Hosted Level
   - In the Webpage - inside the <HEAD> Tag
 We need to check both
+see https://www.owasp.org/index.php/Clickjacking_Defense_Cheat_Sheet for details
+
+As you will see this is a fork from a project by Todd Benson (https://github.com/ToddBenson) so really alot of the Kudos goes to him
