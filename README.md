@@ -12,6 +12,7 @@ This script peforms the following header checks
 - X-Content-Type-Options
 - x-content-security
 - x-download-options
+- x-frame-options*
 - x-powered-by
 - Server
 - Ciphers
