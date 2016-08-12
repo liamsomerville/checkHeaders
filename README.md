@@ -20,7 +20,7 @@ This script peforms the following header checks
 # Important Notes
 *Now, when it comes to the x-frame-options check, OWASP Tells us we can remediate this in two places
   - At the Hosted Level
-  - In the Webpage - inside the <HEAD> Tag
+  - In the Webpage - inside the HEAD Tag
 We need to check both
 see https://www.owasp.org/index.php/Clickjacking_Defense_Cheat_Sheet for details
 
