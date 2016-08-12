@@ -158,7 +158,7 @@ def main():
         print '    Value returned:', response.info().getheader('x-xss-protection')
 
     # Check for x-frame-options
-    # So OWASP Tells us we can do this in two place
+    # So OWASP Tells us we can do this in two places
     # - At the Hosted Level
     # - In the Webpage - inside the <HEAD> Tag
     # We need to check both
