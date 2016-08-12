@@ -24,7 +24,7 @@ This script peforms the following header checks
 -We need to check both
 see https://www.owasp.org/index.php/Clickjacking_Defense_Cheat_Sheet for details
 
-** To check for the ciphers we use nmap - this will need to be installed on your system
+** To check for the ciphers we use nmap - this will need to be installed on your system.
 Using nmap means its really easy to code, but nmap applies a rating to each of the ciphers - the script shows everything that is not an 'A'
 
 #Usage
