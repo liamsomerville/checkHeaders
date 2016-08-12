@@ -214,8 +214,8 @@ if __name__ == '__main__':
 
 print('\n\n=========================================')
 print 'Identifying Weak Ciphers '
-print('=========================================')
-
+print('=========================================\n')
+print 'The following ciphers are of concern and should be addressed'
 
 # To check for ciphers we're goping to use NMap - no need to reinvet the wheel
 # We want to know about ciphers that dont have a 'A' rating
