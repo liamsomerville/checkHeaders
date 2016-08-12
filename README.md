@@ -24,7 +24,7 @@ We need to check both
 see https://www.owasp.org/index.php/Clickjacking_Defense_Cheat_Sheet for details
 
 #Usage
-HTTPScheck.py http://www.domain.com
+HTTPSchecks.py http://www.domain.com
 
 #Kudos
 As you will see this is a fork from a project by Todd Benson (https://github.com/ToddBenson) so really alot of the Kudos goes to him
