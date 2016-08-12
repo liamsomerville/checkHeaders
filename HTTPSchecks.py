@@ -1,11 +1,13 @@
+#!/usr/bin python
 '''
  Original Author ToddBenson, Modified by Liam Somerville
  https://github.com/ToddBenson
  https://github.com/ToddBenson/checkHeaders/blob/master/checkheaders.py
 
 This script peforms the following header checks
+- HTTP Options
 - cache contorl
-- pragma
+- prgma
 - content type
 - content character set
 - access control allow origin
@@ -15,42 +17,64 @@ This script peforms the following header checks
 - x-content-security
 - x-download-options
 - x-powered-by
-- server
+- Server
 - Ciphers
 
 Usuage python HTTPSchecks.py http://www.google.com
-
 
 ******************************************************
 NOTE: The script requires nmap to identify SSL Ciphers
 ******************************************************
 '''
 
-from urllib import urlopen
+#import the modules we need
 import urllib2
 import sys
+import httplib
+import subprocess
+import os
+from BeautifulSoup import BeautifulSoup
+
+#Lets format our input first so we can use it later
+userurl = sys.argv[1]
+url = userurl.replace("http://", "").replace("https://", "")
 
 def main():
 
     if len(sys.argv) < 2:
         print
         print('Please provide a fully-qualified path!\n')
-        print('Usage: python gethead.py path\n')
-        print('Example: python gethead.py http://www.google.com\n\n')
+        print('Usage: python HTTPScheck.py path\n')
+        print('Example: python HTTPSchecks.py http://www.google.com\n\n')
         sys.exit()
     else:
         response = urllib2.urlopen(sys.argv[1])
         print
-        print('HTTP Header Analysis for ' + sys.argv[1] + ':' + '\n\n')
+        print('HTTP Header Analysis for ' + sys.argv[1] + ':')
+
+
+# Lets see if we can determine the HTTP Options - if we can, print them, if not Move on
+    conn=httplib.HTTPConnection(url)
+    conn.request('OPTIONS', '/')
+    optionresponse=conn.getresponse()
+
+    if optionresponse.getheader('allow') == None:
+      dummy=0
+    else:
+      print('\n\n=========================================')
+      print("Checking for HTTP Options...")
+      print('=========================================')
+
+      print optionresponse.getheader('allow')
+
 
     if len(sys.argv) == 3:
         if sys.argv[2] == "-h":
             print("Header:")
             print(urlopen(sys.argv[1]).info())
-    print('=========================================')
+    print('\n\n=========================================')
     print("Checking for security headers...")
     print('=========================================')
-
 
     # Check for cache-control
     if response.info().getheader('cache-control'):
@@ -100,7 +124,7 @@ def main():
     else:
         print('Strict-Transport-Security\t\t\tCheck\t\t HTTP over TLS/SSL is not enforced.')
         print '    Header Missing!'
-   
+    
     #X-Content-Type-Options
     if response.info().getheader('x-content-type-options') == 'nosniff':
         print('X-Content-Type-Options\t\t\t\tOK\t\t x-content-type-options was set properly.')
@@ -116,7 +140,6 @@ def main():
     else:
         print('X-Content-Security-Policy\t\t\tCheck\t\t Content Security Policy is not enforced.')
         print '    Header Missing!'
-        #print '    Value returned:', response.info().getheader('x-content-security-policy')
 
     # check x-download-options:
     if response.info().getheader('x-download-options') == 'noopen':
@@ -133,17 +156,41 @@ def main():
     else:
         print('X-XSS-Protection\t\t\t\tCheck\t\t Cross-Site Scripting Protection was not enable or was not set properly.')
         print '    Value returned:', response.info().getheader('x-xss-protection')
+
     # Check for x-frame-options
+    # So OWASP Tells us we can do this in two place
+    # - At the Hosted Level
+    # - In the Webpage - inside the <HEAD> Tag
+    # We need to check both
+    # See https://www.owasp.org/index.php/Clickjacking_Defense_Cheat_Sheet for references
     if response.info().getheader('x-frame-options'):
     	if response.info().getheader('x-frame-options').lower() == 'deny' or 'sameorigin':
           print("X-Frame-Options\t\t\t\t\tOK\t\t Cross Frame Scripting was not enabled or was not set properly.")
           print '    Value returned:', response.info().getheader('x-frame-options')
-        else:
-          print("X-Frame-Options\t\t\t\t\tCheck\t\t Cross Frame Scripting was not enabled or was not set properly.")
-          print '    Value returned:', response.info().getheader('x-frame-options')
+          page = urllib2.urlopen(sys.argv[1])
+          soup = BeautifulSoup(page.read())
+          headtag = soup.find('head')
+          tag = str(headtag)
+          tag=tag.replace(" ", "").replace("\n", "").lower()
+          cj='<styleid="anticlickjack">'
+          if cj in tag.lower():
+            print "    Clickjacking script Exists in HEAD TAG"
+          else:
+            print "    No Clickjacking script found in HEAD Tag"
+    else:
+	  print('X-Frame-Options\t\t\t\t\tCheck\t\t Cross Frame Scripting was not enabled or was not set properly.')
+ 	  print '    Value returned:', response.info().getheader('x-frame-options')
+	  page = urllib2.urlopen(sys.argv[1])
+	  soup = BeautifulSoup(page.read())
+	  headtag = soup.find('head')
+	  tag = str(headtag)
+	  tag=tag.replace(" ", "").replace("\n", "").lower()
+	  cj='<styleid="anticlickjack">'
+          if cj in tag.lower():
+ 	    print "    Clickjacking script Exists in HEAD TAG"
+	  else:
+ 	    print "    No Clickjacking script found in HEAD Tag"
 
-    
-    
     print('\n\n=========================================')
     print('Checking for information disclosure...')
     print('=========================================')
@@ -161,28 +208,18 @@ def main():
         print '    Value returned:', response.info().getheader('x-powered-by')
     else:
         print('X-Powered-By\t\t\t\t\tOK\t\t x-powered-by was not set.')
+	print('    No X-Powered-By Header')
 if __name__ == '__main__':
     main()
 
-
-###lets  get the ciphers
-
-#import additional modules
-import subprocess
-import os
-
-#Lets format our input first
-userurl = sys.argv[1]
-url = userurl.replace("http://", "")
-
-#Tell the user what we are doing
 print('\n\n=========================================')
-print 'Identifying Weak Ciphers used by ', url
-print '      This may take some time...'
+print 'Identifying Weak Ciphers '
 print('=========================================')
 
 
-#To check for ciphers we're goping to use NMap - no need to reinvet the wheel
+# To check for ciphers we're goping to use NMap - no need to reinvet the wheel
+# We want to know about ciphers that dont have a 'A' rating
+
 nmapout = subprocess.check_output(["/usr/bin/nmap", "-p443 ", url, "--script", "ssl-enum-ciphers"])
 scanresults = open('scan.txt', 'w')
 scanresults.write(nmapout)
